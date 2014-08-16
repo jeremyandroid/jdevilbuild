@@ -1,0 +1,222 @@
+#!/system/bin/sh
+### Pimp my Rom : 64mb zRam Compression
+/system/xbin/busybox mkswap /dev/block/zram0
+/system/xbin/busybox swapon /dev/block/zram0
+echo 67108864 >  /sys/block/zram0/disksize
+### Pimp my Rom : Force GPU Rendering on 2d Operations (init.d part)
+cp -pf /system/lib/egl/libGLES_android.so /sdcard/Android/data/com.androguide.pimp.my.rom/files/libGLES_android.so
+sed -i '/0 0 android/d' /system/lib/egl/egl.cfg
+busybox mount -o remount,noatime,noauto_da_alloc,nosuid,nodev,nodir atime,barrier=0,nobh /data
+busybox mount -o remount,noatime,noauto_da_alloc,nosuid,nodev,nodir atime,barrier=0,nobh /cache
+busybox mount -o remount,noatime,noauto_da_alloc,nosuid,nodev,nodir atime,barrier=0,nobh /data
+busybox mount -o remount,noatime,noauto_da_alloc,nosuid,nodev,nodir atime,barrier=0,nobh /cache
+### Pimp my Rom : Mid Minfree Values
+echo '6400,8960,14080,17920,38400,64000' > /sys/module/lowmemorykiller/parameters/minfree
+### Pimp my Rom : Block Redirects
+busybox sysctl -e -w net.ipv4.conf.all.accept_redirects=0;
+busybox sysctl -e -w net.ipv4.conf.default.accept_redirects=0;
+busybox sysctl -e -w net.ipv4.conf.all.secure_redirects=0;
+busybox sysctl -e -w net.ipv4.conf.default.secure_redirects=0;
+### Pimp my Rom : Block Source-Routing
+busybox sysctl -e -w net.ipv4.conf.default.accept_source_route=0;
+busybox sysctl -e -w net.ipv4.conf.all.accept_source_route=0;
+### Pimp my Rom : IPv4 Tweaks
+busybox sysctl -e -w net.ipv4.tcp_timestamps=0;
+busybox sysctl -e -w net.ipv4.tcp_sack=1;
+busybox sysctl -e -w net.ipv4.tcp_fack=1;
+busybox sysctl -e -w net.ipv4.tcp_congestion_control=cubic;
+busybox sysctl -e -w net.ipv4.tcp_window_scaling=1;
+### Pimp my Rom : Avoid Time-Wait
+busybox sysctl -e -w net.ipv4.tcp_tw_recycle=1;
+busybox sysctl -e -w net.ipv4.tcp_tw_reuse=1;
+### Pimp my Rom : Protection against SYN Attacks
+busybox sysctl -e -w net.ipv4.tcp_syncookies=1;
+busybox sysctl -e -w net.ipv4.conf.all.rp_filter=1;
+busybox sysctl -e -w net.ipv4.conf.default.rp_filter=1;
+busybox sysctl -e -w net.ipv4.tcp_synack_retries=2;
+busybox sysctl -e -w net.ipv4.tcp_syn_retries=2;
+busybox sysctl -e -w net.ipv4.tcp_max_syn_backlog=1024;
+busybox sysctl -e -w net.ipv4.tcp_max_tw_buckets=16384;
+busybox sysctl -e -w net.ipv4.icmp_echo_ignore_all=1;
+busybox sysctl -e -w net.ipv4.icmp_ignore_bogus_error_responses=1;
+busybox sysctl -e -w net.ipv4.tcp_no_metrics_save=1;
+busybox sysctl -e -w net.ipv4.tcp_fin_timeout=15;
+busybox sysctl -e -w net.ipv4.tcp_keepalive_intvl=30;
+busybox sysctl -e -w net.ipv4.tcp_keepalive_probes=5;
+busybox sysctl -e -w net.ipv4.tcp_keepalive_time=1800;
+busybox sysctl -e -w net.ipv4.ip_forward=0;
+### Pimp my Rom : Disable Android Logger
+rm -f /dev/log/main
+### Pimp my Rom : Optimization of all sqlite3 databases each boot
+for sqlite3 in \ 
+/data/data/com.android.providers.calendar/databases/calendar.db
+/data/data/com.android.providers.contacts/databases/contacts2.db
+/data/data/com.android.providers.contacts/databases/profile.db
+/data/data/com.android.providers.downloads/databases/downloads.db
+/data/data/com.google.android.partnersetup/databases/rlz_data.db
+/data/data/com.google.android.gsf/databases/gservices.db
+/data/data/com.google.android.gsf/databases/subscribedfeeds.db
+/data/data/com.google.android.gsf/databases/googlesettings.db
+/data/data/com.google.android.gsf/databases/talk.db
+/data/data/com.android.launcher/cache/widgetpreviews.db
+/data/data/com.android.launcher/databases/launcher.db
+/data/data/com.android.providers.media/databases/external.db
+/data/data/com.android.providers.media/databases/internal.db
+/data/data/com.android.vending/databases/localappstate.db
+/data/data/com.android.vending/databases/library.db
+/data/data/com.android.vending/databases/suggestions.db
+/data/data/com.android.vending/databases/package_verification.db
+/data/data/com.google.android.gms/databases/plus.db
+/data/data/com.google.android.gms/databases/gcore_ulr_UlrLocation.db
+/data/data/com.google.android.gms/databases/gcore_ulr_ActivityDetection.db
+/data/data/com.google.android.gms/databases/gcore_ulr_ApiMetadata.db
+/data/data/com.google.android.gms/databases/rmq.db
+/data/data/com.google.android.gms/databases/peoplelog.db
+/data/data/com.google.android.gms/databases/pluscontacts.db
+/data/data/com.google.android.gms/databases/dg.db
+/data/data/com.google.android.gms/databases/games_d05b2ca5.db
+/data/data/com.google.android.gms/databases/keys.db
+/data/data/com.google.android.gms/databases/app_state.db
+/data/data/com.google.android.gms/databases/google_analytics.db
+/data/data/com.google.android.gms/databases/node.db
+/data/data/com.google.android.gms/databases/DocList.db
+/data/data/com.google.android.gms/app_webview/databases/Databases.db
+/data/data/com.android.providers.settings/databases/settings.db
+/data/data/com.google.android.googlequicksearchbox/cache/widgetpreviews.db
+/data/data/com.google.android.googlequicksearchbox/databases/icingcorpora.db
+/data/data/com.google.android.apps.books/databases/books.db
+/data/data/com.google.android.apps.books/files/accounts/strain.jeremy89@gmail.com/books2.db
+/data/data/com.android.chrome/databases/snapshots.db
+/data/data/com.google.android.deskclock/databases/alarms.db
+/data/data/com.android.documentsui/databases/recents.db
+/data/data/com.google.android.apps.docs/databases/ClientFlag.db
+/data/data/com.google.android.apps.docs/databases/DocList.db
+/data/data/com.google.android.email/databases/EmailProvider.db
+/data/data/com.google.android.email/databases/EmailProviderBody.db
+/data/data/com.google.android.email/databases/EmailProviderBackup.db
+/data/data/com.google.android.gallery3d/databases/picasa.upload.db
+/data/data/com.google.android.gallery3d/databases/picasa.db
+/data/data/com.google.android.gallery3d/databases/photo.db
+/data/data/com.google.android.gallery3d/databases/google_analytics_v2.db
+/data/data/com.google.android.gm/databases/internal.strain.jeremy89@gmail.com.db
+/data/data/com.google.android.gm/databases/mailstore.strain.jeremy89@gmail.com.db
+/data/data/com.google.android.ears/databases/heard.db
+/data/data/com.google.android.talk/databases/babel0.db
+/data/data/com.google.android.talk/databases/message_store.db
+/data/data/com.google.android.talk/databases/babel1.db
+/data/data/com.google.android.talk/databases/apn.db
+/data/data/com.google.android.keep/databases/keep.db
+/data/data/com.android.keychain/databases/grants.db
+/data/data/com.google.android.apps.maps/databases/gmm_myplaces.db
+/data/data/com.google.android.music/databases/music.db
+/data/data/com.google.android.music/databases/config.db
+/data/data/com.android.providers.partnerbookmarks/databases/partnerBookmarks.db
+/data/data/com.google.android.apps.plus/databases/iu.upload.db
+/data/data/com.google.android.apps.plus/databases/es0.db
+/data/data/com.google.android.apps.plus/databases/metrics.db
+/data/data/com.google.android.apps.plus/databases/google_analytics_v2.db
+/data/data/com.google.android.apps.plus/databases/trash.db
+/data/data/com.quickoffice.android/databases/keyvaluedb.db
+/data/data/com.android.providers.telephony/databases/mmssms.db
+/data/data/com.android.providers.telephony/databases/telephony.db
+/data/data/com.android.providers.userdictionary/databases/user_dict.db
+/data/data/com.google.android.videos/databases/purchase_store.db
+/data/data/com.google.android.youtube/databases/google_analytics.db
+/data/data/com.google.android.youtube/databases/downloads.db
+/data/data/com.google.android.maps.mytracks/databases/mytracks.db
+/data/data/com.faithcomesbyhearing.android.bibleis/databases/google_analytics.db
+/data/data/com.dropbox.android/databases/prefs.db
+/data/data/com.dropbox.android/databases/prefs-shared.db
+/data/data/com.dropbox.android/databases/55351385-prefs.db
+/data/data/com.dropbox.android/databases/55351385-db.db
+/data/data/com.dropbox.android/app_DropboxSyncCache/hizqkiq3952astb/55351385-notifications/cache.db
+/data/data/com.anddoes.launcher/cache/widgetpreviews.db
+/data/data/com.anddoes.launcher/databases/launcher.db
+/data/data/com.anddoes.launcher/databases/google_analytics.db
+/data/data/com.jrummy.busybox.installer.pro/databases/scripter.db
+/data/data/tunein.player/databases/tunein.player.tunein.db
+/data/data/tunein.player/databases/tunein.player.tasks.db
+/data/data/tunein.player/databases/tunein.player.sched.db
+/data/data/tunein.player/databases/http_auth.db
+/data/data/com.maxmpz.audioplayer/databases/folders.db
+/data/data/com.shazam.encore.android/databases/library.db
+/data/data/com.quoord.tapatalkxdapre.activity/databases/tapatalknew.db
+/data/data/com.koushikdutta.rommanager/databases/settings.db
+/data/data/com.jrummy.liberty.toolboxpro/databases/benchmark.db
+/data/data/com.jrummy.liberty.toolboxpro/databases/app_actions.db
+/data/data/com.jrummy.liberty.toolboxpro/databases/schedules_info.db
+/data/data/os.tools.scriptmanagerpro/databases/scheduler.db
+/data/data/os.tools.scriptmanagerpro/databases/bookmarks.db
+/data/data/com.cleanmaster.mguard/files/clearpath5_other.db
+/data/data/com.cleanmaster.mguard/files/clearpath6_cache.db
+/data/data/com.cleanmaster.mguard/files/strings2_cache.db
+/data/data/com.cleanmaster.mguard/files/pkgquery2_hf_en.db
+/data/data/com.cleanmaster.mguard/files/strings2_other.db
+/data/data/com.cleanmaster.mguard/files/process_tips2.db
+/data/data/com.cleanmaster.mguard/files/se_cloud_hf.db
+/data/data/com.cleanmaster.mguard/files/descpvirus.db
+/data/data/com.cleanmaster.mguard/files/appmem_hf_en.db
+/data/data/com.cleanmaster.mguard/files/appinfo2_hf_en.db
+/data/data/com.cleanmaster.mguard/files/pkgcache2_hf_en.db
+/data/data/com.cleanmaster.mguard/files/preinstall2_hf_en.db
+/data/data/com.cleanmaster.mguard/files/pkgcache2_show_hf_en.db
+/data/data/com.cleanmaster.mguard/databases/downloads.db
+/data/data/com.cleanmaster.mguard/databases/gamecache.db
+/data/data/com.cleanmaster.mguard/databases/cleanmaster_process_list.db
+/data/data/com.cleanmaster.mguard/databases/world_cup_db.db
+/data/data/com.cleanmaster.mguard/databases/timewall_cache.db
+/data/data/com.cleanmaster.mguard/databases/market.db
+/data/data/com.cleanmaster.mguard/databases/cm_push_message_db.db
+/data/data/com.cleanmaster.mguard/databases/memory_cache.db
+/data/data/com.cleanmaster.mguard/databases/marketdl.db
+/data/data/com.cleanmaster.mguard/databases/se_cloud_cache.db
+/data/data/com.cleanmaster.mguard/databases/se_local_cache.db
+/data/data/com.cleanmaster.mguard/databases/residual_pkgcache.db
+/data/data/com.cleanmaster.mguard/databases/diskcache.db
+/data/data/com.cleanmaster.mguard/databases/residual_dircache.db
+/data/data/com.cleanmaster.mguard/databases/cc_statistics.db
+/data/data/com.cleanmaster.mguard/databases/pkgcache_cache.db
+/data/data/it.evilsocket.dsploit/files/tools/nmap/scripts/script.db
+/data/data/uk.digitalsquid.netspoofer/databases/google_analytics_v4.db
+/data/data/com.lowlevel.moviedroid/databases/http_auth.db
+/data/data/com.lowlevel.moviedroid/databases/moviedroid.db
+/data/data/com.lowlevel.moviedroid/databases/mediadroid.db
+/data/data/com.pandora.android/databases/pandora.db
+/data/data/com.ghwth.tb3wn/databases/ldata.db
+/data/data/com.appblue.pythonbeginner/databases/favorites.db
+/data/data/com.appblue.pythonbeginner/databases/google_analytics_v2.db
+/data/data/devian.tubemate.home/databases/tubemate.db
+/data/data/devian.tubemate.home/databases/google_analytics.db
+/data/data/devian.tubemate.home/databases/suggestions.db
+/data/data/radiotime.player/databases/radiotime.player.tasks.db
+/data/data/radiotime.player/databases/radiotime.player.sched.db
+/data/data/radiotime.player/databases/google_analytics_v2.db
+/data/data/com.berobo.android.police.scanner.pro/databases/google_analytics.db
+/data/media/0/Android/data/cn.wps.moffice_eng/.cache/KingsoftOffice/databases/docmanager.db
+/data/media/0/musicwizard/db/mdd.db
+/data/system/users/0/accounts.db
+/data/system/locksettings.db
+/data/zipalign.db; do \ 
+/system/xbin/sqlite3  'VACUUM;';
+/system/xbin/sqlite3  'REINDEX;'; done;
+### Pimp my Rom : Ext4 File-Systems optimization & instant-mount
+busybox mount -o remount,noatime,noauto_da_alloc,nodiratime,barrier =0,nobh /system
+busybox mount -o remount,noatime,noauto_da_alloc,nosuid,nodev,nodir atime,barrier=0,nobh /data
+busybox mount -o remount,noatime,noauto_da_alloc,nosuid,nodev,nodir atime,barrier=0,nobh /cache
+### Pimp my Rom : External SD I/O Tweaks
+echo 128 > /sys/devices/virtual/bdi/7:0/read_ahead_kb
+echo 128 > /sys/devices/virtual/bdi/7:1/read_ahead_kb
+echo 128 > /sys/devices/virtual/bdi/7:2/read_ahead_kb
+echo 128 > /sys/devices/virtual/bdi/7:3/read_ahead_kb
+echo 128 > /sys/devices/virtual/bdi/7:4/read_ahead_kb
+echo 128 > /sys/devices/virtual/bdi/7:5/read_ahead_kb
+echo 128 > /sys/devices/virtual/bdi/7:6/read_ahead_kb
+echo 128 > /sys/devices/virtual/bdi/7:7/read_ahead_kb
+echo 4096 > /sys/devices/virtual/bdi/179:0/read_ahead_kb
+echo 4096 > /sys/devices/virtual/bdi/default/read_ahead_kb
+echo 97 > /sys/devices/virtual/bdi/179:0/max_ratio
+echo 97 > /sys/devices/virtual/bdi/default/max_ratio
+echo 4096 > /sys/devices/virtual/bdi/179:0/read_ahead_kb;
+### Pimp my Rom : Battery Savings
+echo 500 > /proc/sys/vm/dirty_expire_centisecs
+echo 1000 > /proc/sys/vm/dirty_writeback_centisecs

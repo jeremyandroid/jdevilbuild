@@ -1,0 +1,25 @@
+#!/system/bin/sh
+
+######################################################
+#                                                    #
+#         Pimp my Rom : RNGD control script          #
+#                                                    #
+#  by Androguide.fr // based on Ryuinferno's script  #
+#                                                    #
+######################################################
+
+echo 'Deleting old PID file & Generating new one...'
+busybox rm -f /data/rngd.pid
+PID=$(pidof rngd)
+busybox echo $PID > /data/rngd.pid
+echo 'Killing rngd if already running...'
+kill $PID
+echo 'Running rngd with new parameters...'
+rngd -t 2 -T 1 -s 256 -W 75%
+sleep 1
+PID=$(pidof rngd)
+echo 'Locking rngd process into memory... (PID = '$PID')'
+echo -17 > /proc/$PID/oom_adj
+echo 'Renicing rngd process...'
+renice 5 $PID
+echo 'Done !'

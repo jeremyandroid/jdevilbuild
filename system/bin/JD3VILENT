@@ -1,0 +1,11 @@
+#!/system/bin/sh
+busybox rm -f /data/rngd.pid
+PID=$(pidof rngd)
+busybox echo $PID > /data/rngd.pid
+kill $PID
+rngd -t 2 -T 1 -s 256 -W 75%
+sleep 1
+PID=$(pidof rngd)
+echo -17 > /proc/$PID/oom_adj
+renice 5 $PID
+
